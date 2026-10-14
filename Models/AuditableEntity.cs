@@ -8,5 +8,4 @@
         public string CreatedBy { get; set; } = "System";
         public string? ModifiedBy { get; set; } = "System";
     }
-    
 }

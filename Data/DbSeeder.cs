@@ -31,7 +31,7 @@ namespace ticketManage.Data
 
                 CreatedBy = "System",
                 ModifiedBy = "System",
-                IsDeleted = false
+                IsDeleted = false,
             };
 
             var result = await userManager.CreateAsync(admin, adminPassword);

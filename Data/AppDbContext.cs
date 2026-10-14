@@ -7,74 +7,70 @@ namespace ticketManage.Data
 {
     public class AppDbContext : IdentityDbContext<User>
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-        {
-        }
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+            : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<ConversationMember>()
-                .HasKey(x => new
-                {
-                    x.MemberId,
-                    x.ConversationId
-                });
+            modelBuilder
+                .Entity<ConversationMember>()
+                .HasKey(x => new { x.MemberId, x.ConversationId });
 
-            modelBuilder.Entity<ConversationMember>()
+            modelBuilder
+                .Entity<ConversationMember>()
                 .HasOne(x => x.Member)
                 .WithMany()
                 .HasForeignKey(x => x.MemberId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<ConversationMember>()
+            modelBuilder
+                .Entity<ConversationMember>()
                 .HasOne(x => x.Conversation)
                 .WithMany(x => x.Members)
                 .HasForeignKey(x => x.ConversationId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Ticket>()
+            modelBuilder
+                .Entity<Ticket>()
                 .HasOne(x => x.IssuedByUser)
                 .WithMany()
                 .HasForeignKey(x => x.IssuedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Ticket>()
+            modelBuilder
+                .Entity<Ticket>()
                 .HasOne(x => x.AssignedToUser)
                 .WithMany()
                 .HasForeignKey(x => x.AssignedToUserId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            modelBuilder.Entity<Chat>()
+            modelBuilder
+                .Entity<Chat>()
                 .HasOne(x => x.FromUser)
                 .WithMany()
                 .HasForeignKey(x => x.FromUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Comment>()
+            modelBuilder
+                .Entity<Comment>()
                 .HasOne(x => x.ParentComment)
                 .WithMany(x => x.Replies)
                 .HasForeignKey(x => x.ParentCommentId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Ticket>()
-                .HasQueryFilter(x => !x.IsDeleted);
+            modelBuilder.Entity<Ticket>().HasQueryFilter(x => !x.IsDeleted);
 
-            modelBuilder.Entity<Comment>()
-                .HasQueryFilter(x => !x.IsDeleted);
+            modelBuilder.Entity<Comment>().HasQueryFilter(x => !x.IsDeleted);
 
-            modelBuilder.Entity<Chat>()
-                .HasQueryFilter(x => !x.IsDeleted);
+            modelBuilder.Entity<Chat>().HasQueryFilter(x => !x.IsDeleted);
 
-            modelBuilder.Entity<FileAsset>()
-                .HasQueryFilter(x => !x.IsDeleted);
+            modelBuilder.Entity<FileAsset>().HasQueryFilter(x => !x.IsDeleted);
 
-            modelBuilder.Entity<StorageObject>()
-                .HasQueryFilter(x => !x.IsDeleted);
+            modelBuilder.Entity<StorageObject>().HasQueryFilter(x => !x.IsDeleted);
 
-            modelBuilder.Entity<User>()
-                .HasQueryFilter(x => !x.IsDeleted);
+            modelBuilder.Entity<User>().HasQueryFilter(x => !x.IsDeleted);
         }
 
         public DbSet<Ticket> Tickets => Set<Ticket>();
@@ -84,5 +80,6 @@ namespace ticketManage.Data
         public DbSet<ConversationMember> ConversationMembers => Set<ConversationMember>();
         public DbSet<FileAsset> FileAssets => Set<FileAsset>();
         public DbSet<StorageObject> StorageObjects => Set<StorageObject>();
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     }
 }

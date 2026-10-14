@@ -20,6 +20,5 @@ namespace ticketManage.Models
 
         public FileAssetPurpose Purpose { get; set; }
         public string Note { get; set; }
-
     }
 }

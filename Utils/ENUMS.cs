@@ -1,6 +1,5 @@
 ﻿namespace ticketManage.Utils
 {
-
     public enum AccountType
     {
         Employee,
@@ -8,7 +7,7 @@
         Support,
         QA,
         Developer,
-        Admin
+        Admin,
     }
 
     public enum TicketStatus
@@ -19,12 +18,13 @@
         Failed,
         Completed,
         Reopened,
-        Expired
+        Expired,
     }
+
     public enum StorageProvider
     {
         Database,
-        S3
+        S3,
     }
 
     public enum FileAssetPurpose
@@ -32,7 +32,12 @@
         ProfilePicture,
         TicketAttachment,
         CommentAttachment,
-        RichTextImage
+        RichTextImage,
     }
 
+    public enum TokenType
+    {
+        Access,
+        Refresh,
+    }
 }

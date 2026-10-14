@@ -14,7 +14,7 @@ namespace ticketManage.Models
 
         public string? AssignedToUserId { get; set; }
         public User? AssignedToUser { get; set; }
-        public ICollection<FileAsset>? Attachments{ get; set; }
+        public ICollection<FileAsset>? Attachments { get; set; }
         public bool IsDeleted { get; set; }
     }
 }

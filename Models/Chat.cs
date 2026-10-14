@@ -8,6 +8,5 @@
         public string FromUserId { get; set; }
         public User FromUser { get; set; } = null!;
         public bool IsDeleted { get; set; }
-
     }
 }

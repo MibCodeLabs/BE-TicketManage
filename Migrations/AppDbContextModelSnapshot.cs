@@ -353,6 +353,32 @@ namespace ticketManage.Migrations
                     b.ToTable("FileAssets");
                 });
 
+            modelBuilder.Entity("ticketManage.Models.RefreshToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("ticketManage.Models.StorageObject", b =>
                 {
                     b.Property<long>("Id")
@@ -654,6 +680,17 @@ namespace ticketManage.Migrations
                         .HasForeignKey("TicketId");
 
                     b.Navigation("StorageObject");
+                });
+
+            modelBuilder.Entity("ticketManage.Models.RefreshToken", b =>
+                {
+                    b.HasOne("ticketManage.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ticketManage.Models.Ticket", b =>
