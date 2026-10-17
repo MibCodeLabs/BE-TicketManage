@@ -12,6 +12,7 @@ namespace ticketManage.Services
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<User> _userManager;
+        private readonly UserService _userService;
         private readonly SignInManager<User> _signInManager;
         private readonly JwtService _jwtService;
         private readonly RefreshTokenService _refreshTokenService;
@@ -21,7 +22,8 @@ namespace ticketManage.Services
             SignInManager<User> signInManager,
             JwtService jwtService,
             IHttpContextAccessor httpContextAccessor,
-            RefreshTokenService refreshTokenService
+            RefreshTokenService refreshTokenService,
+            UserService userService
         )
         {
             _refreshTokenService = refreshTokenService;
@@ -29,6 +31,7 @@ namespace ticketManage.Services
             _signInManager = signInManager;
             _jwtService = jwtService;
             _httpContextAccessor = httpContextAccessor;
+            _userService = userService;
         }
 
         public async Task<LoginResponse?> LoginAsync(ticketManage.DTOs.Auth.LoginRequest request)
@@ -40,13 +43,15 @@ namespace ticketManage.Services
                 return null;
             }
 
-            var result = await _signInManager.CheckPasswordSignInAsync(
-                user,
-                request.Password,
-                lockoutOnFailure: true
-            );
-
-            if (!result.Succeeded)
+            if (
+                !(
+                    await _signInManager.CheckPasswordSignInAsync(
+                        user,
+                        request.Password,
+                        lockoutOnFailure: true
+                    )
+                ).Succeeded
+            )
             {
                 return null;
             }
@@ -56,11 +61,11 @@ namespace ticketManage.Services
 
             if (refreshToken == null)
             {
-                throw new InvalidOperationException("Contact Support");
+                throw new InvalidOperationException("Login Error, Contact Support");
             }
 
             return AuthMapper.ToLoginResponse(
-                AuthMapper.ToLoginUserResponse(user),
+                AuthMapper.ToLoggedInUserResponse(user),
                 "Login successful",
                 accessToken,
                 refreshToken.ToString()
@@ -89,27 +94,6 @@ namespace ticketManage.Services
             return await _userManager.CreateAsync(user, registerRequest.Password);
         }
 
-        public async Task<User> GetUser()
-        {
-            var principal = _httpContextAccessor.HttpContext?.User;
-
-            var userId = principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                throw new UnauthorizedAccessException("User is not authenticated.");
-            }
-
-            var user = await _userManager.FindByIdAsync(userId);
-
-            if (user == null)
-            {
-                throw new UnauthorizedAccessException("User not found.");
-            }
-
-            return user;
-        }
-
         public async Task LogoutAsync()
         {
             var principal = _httpContextAccessor.HttpContext?.User;
@@ -123,19 +107,13 @@ namespace ticketManage.Services
 
         public async Task<RefreshResponse> Refresh()
         {
-            var principal = _httpContextAccessor.HttpContext?.User;
-
-            var userId =
-                principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                ?? throw new UnauthorizedAccessException("User is not authenticated.");
-
-            var user =
-                await _userManager.FindByIdAsync(userId)
-                ?? throw new UnauthorizedAccessException("User is not authenticated.");
+            var user = await _userService.GetCurrentUser();
             string accessToken = _jwtService.GenerateAccessToken(user).ToString();
             string refreshToken = await _jwtService.GenerateAndSaveRefreshToken(user);
 
-            return AuthMapper.ToRefreshResponse(accessToken, refreshToken);
+            Console.WriteLine($"Tokens identical: {accessToken == refreshToken}");
+
+            return RefreshResponse.Create(refreshToken, accessToken);
         }
     }
 }

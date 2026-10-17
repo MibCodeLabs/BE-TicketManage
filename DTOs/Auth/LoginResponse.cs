@@ -5,6 +5,6 @@
         public string Message { get; set; } = "";
         public string AccessToken { get; set; } = "";
         public string RefreshToken { get; set; } = "";
-        public LoginUserResponse User { get; set; } = null!;
+        public LoggedInUserResponse User { get; set; } = null!;
     }
 }

@@ -35,5 +35,18 @@ namespace ticketManage.Utils
         {
             AddCookie(response, key, value, GenerateSecureCookieOptions(expirationMinutes));
         }
+
+        public static void DeleteCookie(HttpResponse response, string key)
+        {
+            response.Cookies.Delete(
+                key,
+                new CookieOptions
+                {
+                    Path = Constants.SECURE_COOKIE_PATH,
+                    Secure = Constants.SECURE_COOKIE_SECURE_FLAG,
+                    SameSite = Constants.SECURE_COOKIE_SAMESITE,
+                }
+            );
+        }
     }
 }

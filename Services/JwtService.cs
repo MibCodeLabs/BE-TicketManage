@@ -59,7 +59,6 @@ namespace ticketManage.Services
                     audience: _configuration[Constants.JWT_AUDIENCE],
                     claims: claims,
                     expires: DateTime.UtcNow.AddMinutes(expirationMinutes),
-                    //expires: DateTime.UtcNow.AddSeconds(expirationMinutes),
                     signingCredentials: credentials
                 )
             );
@@ -79,6 +78,7 @@ namespace ticketManage.Services
                 int.Parse(_configuration[Constants.JWT_REFRESH_EXPIRATION_MINUTES]!),
                 this.GetCredentials()
             );
+
             return refreshToken;
         }
 

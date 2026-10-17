@@ -19,6 +19,27 @@ namespace ticketManage.Models
         public bool IsDeleted { get; set; }
 
         public FileAssetPurpose Purpose { get; set; }
-        public string Note { get; set; }
+        public string Note { get; set; } = "";
+
+        public static FileAsset CreateNewLocalDatabaseFileAsset(
+            FileAssetPurpose purpose,
+            StorageObject storageObject,
+            long size,
+            string contentType,
+            string fileName
+        )
+        {
+            return new FileAsset
+            {
+                Note = "Saved File Locally in DB for purpose of " + purpose.ToString(),
+                IsDeleted = false,
+                Purpose = purpose,
+                StorageObject = storageObject,
+                StorageObjectId = storageObject.Id,
+                Size = size,
+                ContentType = contentType,
+                FileName = fileName,
+            };
+        }
     }
 }

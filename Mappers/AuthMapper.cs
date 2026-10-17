@@ -10,14 +10,14 @@ namespace ticketManage.Mappers
     {
         [MapProperty(
             nameof(User.AccountType),
-            nameof(LoginUserResponse.AccountType),
+            nameof(LoggedInUserResponse.AccountType),
             Use = nameof(AccountTypeToString)
         )]
-        public static partial LoginUserResponse ToLoginUserResponse(User user);
+        public static partial LoggedInUserResponse ToLoggedInUserResponse(User user);
 
         [MapProperty(nameof(user), nameof(LoginResponse.User))]
         public static partial LoginResponse ToLoginResponse(
-            LoginUserResponse user,
+            LoggedInUserResponse user,
             string message,
             string accessToken,
             string refreshToken
@@ -30,12 +30,5 @@ namespace ticketManage.Mappers
             accountType.ToString();
 
         public static partial LoginApiResponse ToLoginApiResponse(LoginResponse loginResponse);
-
-        [MapProperty(nameof(accessToken), nameof(RefreshResponse.AccessToken))]
-        [MapProperty(nameof(refreshToken), nameof(RefreshResponse.RefreshToken))]
-        public static partial RefreshResponse ToRefreshResponse(
-            string accessToken,
-            string refreshToken
-        );
     }
 }

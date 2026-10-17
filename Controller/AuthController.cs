@@ -15,17 +15,21 @@ namespace ticketManage.Controller
     {
         private readonly ILogger<AuthController> _logger;
         private readonly AuthService _authService;
+        private readonly UserService _userService;
+
         private readonly IConfiguration _configuration;
 
         public AuthController(
             AuthService authService,
             IConfiguration configuration,
-            ILogger<AuthController> logger
+            ILogger<AuthController> logger,
+            UserService userService
         )
         {
             _authService = authService;
             _configuration = configuration;
             _logger = logger;
+            _userService = userService;
         }
 
         [HttpPost("register")]
@@ -64,10 +68,10 @@ namespace ticketManage.Controller
         [HttpGet("me")]
         public async Task<IActionResult> Me()
         {
-            return Ok(AuthMapper.ToLoginUserResponse(await this._authService.GetUser()));
+            return Ok(AuthMapper.ToLoggedInUserResponse(await this._userService.GetCurrentUser()));
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "RefreshToken")]
         [HttpGet("refresh")]
         public async Task<IActionResult> Refresh()
         {
@@ -93,9 +97,8 @@ namespace ticketManage.Controller
         {
             await _authService.LogoutAsync();
 
-            Response.Cookies.Delete(TokenType.Access.ToString());
-            Response.Cookies.Delete(TokenType.Refresh.ToString());
-
+            ResponseUtils.DeleteCookie(Response, TokenType.Access.ToString());
+            ResponseUtils.DeleteCookie(Response, TokenType.Refresh.ToString());
             return Ok(new { message = "Logout successful." });
         }
     }

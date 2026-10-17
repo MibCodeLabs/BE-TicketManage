@@ -3,6 +3,6 @@
     public class LoginApiResponse
     {
         public string Message { get; set; } = "";
-        public LoginUserResponse User { get; set; } = null!;
+        public LoggedInUserResponse User { get; set; } = null!;
     }
 }

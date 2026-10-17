@@ -2,7 +2,7 @@
 
 namespace ticketManage.DTOs.Auth
 {
-    public class LoginUserResponse
+    public class LoggedInUserResponse
     {
         public string FullName { get; set; } = "";
         public string AccountType { get; set; } = "";

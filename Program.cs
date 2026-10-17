@@ -20,8 +20,11 @@ var connectionString =
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
 );
-
+builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<FileAssetService>();
+builder.Services.AddScoped<StorageObjectService>();
+builder.Services.AddScoped<TicketService>();
 builder.Services.AddScoped<RefreshTokenService>();
 builder.Services.AddScoped<JwtService>();
 
@@ -78,7 +81,45 @@ builder
                 return Task.CompletedTask;
             },
         };
-    });
+    })
+    .AddJwtBearer(
+        "RefreshToken",
+        options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+
+                ValidIssuer = configuration[Constants.JWT_ISSUER],
+                ValidAudience = configuration[Constants.JWT_AUDIENCE],
+
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+
+                ClockSkew = TimeSpan.Zero,
+            };
+
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    context.Token = context.Request.Cookies[TokenType.Refresh.ToString()];
+                    return Task.CompletedTask;
+                },
+
+                OnAuthenticationFailed = context =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<
+                        ILogger<Program>
+                    >();
+                    logger.LogWarning(context.Exception, "Refresh token authentication failed.");
+                    return Task.CompletedTask;
+                },
+            };
+        }
+    );
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
