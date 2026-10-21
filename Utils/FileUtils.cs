@@ -1,4 +1,6 @@
-﻿namespace ticketManage.Utils
+﻿using ticketManage.Models;
+
+namespace ticketManage.Utils
 {
     public static class FileUtils
     {
@@ -10,6 +12,12 @@
             using var memoryStream = new MemoryStream();
             await file.CopyToAsync(memoryStream);
             return memoryStream.ToArray();
+        }
+
+        public static string MakeFileUrl(FileAsset fileAsset)
+        {
+            //we will add swicth statement later for when storage is no longer local
+            return String.Concat("/res/", fileAsset.Id);
         }
     }
 }

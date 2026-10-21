@@ -10,8 +10,8 @@ namespace ticketManage.Models
         public AccountType AccountType { get; set; } = AccountType.Employee;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime ModifiedAt { get; set; } = DateTime.UtcNow;
-        public string CreatedBy { get; set; } = "System";
-        public string? ModifiedBy { get; set; } = "System";
+        public string CreatedBy { get; set; } = Constants.DEFAULT_SYSTEM;
+        public string? ModifiedBy { get; set; } = Constants.DEFAULT_SYSTEM;
         public bool IsDeleted { get; set; } = false;
     }
 }

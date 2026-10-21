@@ -1,36 +1,35 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using ticketManage.Models;
+using ticketManage.Utils;
 
 namespace ticketManage.Services
 {
     public class UserService
     {
         private readonly UserManager<User> _userManager;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly CurrentUserService _currentUserService;
 
-        public UserService(UserManager<User> userManager, IHttpContextAccessor httpContextAccessor)
+        public UserService(UserManager<User> userManager, CurrentUserService currentUserService)
         {
             _userManager = userManager;
-            _httpContextAccessor = httpContextAccessor;
+            _currentUserService = currentUserService;
         }
 
         public async Task<User> GetCurrentUser()
         {
-            var principal = _httpContextAccessor.HttpContext?.User;
-
-            var userId =
-                principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                ?? throw new UnauthorizedAccessException("User is not authenticated.");
-
-            return await _userManager.FindByIdAsync(userId)
-                ?? throw new UnauthorizedAccessException("User is not authenticated.Id invalid");
+            var userId = this._currentUserService.GetCurrentUserIdChecked();
+            return await this.GetUserById(userId);
         }
 
         public async Task<User> GetUserById(string userId)
         {
+            if (Utility.IsNullOrEmpty(userId))
+            {
+                throw new BadHttpRequestException("User is not present");
+            }
             return await _userManager.FindByIdAsync(userId)
-                ?? throw new UnauthorizedAccessException("User is not authenticated.Id invalid");
+                ?? throw new UnauthorizedAccessException("User is invalid");
         }
     }
 }

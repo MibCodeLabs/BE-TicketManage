@@ -40,4 +40,10 @@
         Access,
         Refresh,
     }
+
+    public enum SortDirection
+    {
+        Ascending,
+        Descending,
+    }
 }

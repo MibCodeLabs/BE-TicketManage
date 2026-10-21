@@ -71,6 +71,9 @@ namespace ticketManage.Data
             modelBuilder.Entity<StorageObject>().HasQueryFilter(x => !x.IsDeleted);
 
             modelBuilder.Entity<User>().HasQueryFilter(x => !x.IsDeleted);
+
+            modelBuilder.Entity<Ticket>().Property(t => t.Status).HasConversion<string>();
+            modelBuilder.Entity<FileAsset>().Property(f => f.Purpose).HasConversion<string>();
         }
 
         public DbSet<Ticket> Tickets => Set<Ticket>();

@@ -29,8 +29,8 @@ namespace ticketManage.Data
 
                 ProfilePicture = "/images/default-avatar.svg",
 
-                CreatedBy = "System",
-                ModifiedBy = "System",
+                CreatedBy = Constants.DEFAULT_SYSTEM,
+                ModifiedBy = Constants.DEFAULT_SYSTEM,
                 IsDeleted = false,
             };
 

@@ -16,10 +16,15 @@ var configuration = builder.Configuration;
 var connectionString =
     configuration.GetConnectionString(Constants.DB_CONNECTION_STRING)
     ?? throw new InvalidOperationException("Database connection string is not configured.");
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+builder.Services.AddScoped<AuditSaveChangesInterceptor>();
+builder.Services.AddDbContext<AppDbContext>(
+    (serviceProvider, options) =>
+    {
+        options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+        options.AddInterceptors(serviceProvider.GetRequiredService<AuditSaveChangesInterceptor>());
+    }
 );
+builder.Services.AddScoped<CurrentUserService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<FileAssetService>();

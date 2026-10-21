@@ -14,5 +14,9 @@
         public const bool SECURE_COOKIE_SECURE_FLAG = true;
         public const bool SECURE_COOKIE_HTTP_ONLY_FLAG = true;
         public const string SECURE_COOKIE_PATH = "/";
+        public const string DEFAULT_SYSTEM = "system";
+        public const int DEFAULT_PAGE_SIZE = 10;
+        public const int DEFAULT_MAX_PAGE_SIZE = 50;
+        public const int DEFAULT_START_PAGE_NUMBER = 0;
     }
 }
