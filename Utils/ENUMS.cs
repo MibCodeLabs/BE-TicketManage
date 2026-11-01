@@ -46,4 +46,16 @@
         Ascending,
         Descending,
     }
+
+    public enum AllowedMimeType
+    {
+        Pdf,
+        Svg,
+        Png,
+        Jpeg,
+        Webp,
+        PlainText,
+        Csv,
+        Zip,
+    }
 }

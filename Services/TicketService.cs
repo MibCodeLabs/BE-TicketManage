@@ -1,7 +1,9 @@
-﻿using System.Net.Sockets;
+﻿using Microsoft.EntityFrameworkCore;
 using ticketManage.Data;
-using ticketManage.DTOs.Shared;
+using ticketManage.DTOs.FileAsset;
 using ticketManage.DTOs.Ticket;
+using ticketManage.DTOs.User;
+using ticketManage.Exceptions;
 using ticketManage.Mappers;
 using ticketManage.Models;
 using ticketManage.Utils;
@@ -32,36 +34,95 @@ namespace ticketManage.Services
             return TicketMapper.toTicketResponse(ticket);
         }
 
-        public async Task<TicketResponse> CreateTicket(CreateTicketRequest request)
+        public async Task<TicketResponse> UpsertTicket(UpsertTicketRequest request)
         {
-            //add transaction boudnary later and also check other places for same
-            FileAsset[] fileAttachments = await _fileAssetService.AddLocalDatabaseFileAssetsAsync(
-                request.Attachments ?? [],
-                FileAssetPurpose.TicketAttachment
-            );
-            var ticket = Ticket.CreateNew(
-                request.Title,
-                request.Description,
-                await _userService.GetCurrentUser(),
-                (
-                    Utility.IsNotNullOrEmpty(request.AssignedTo)
-                    && Utility.IsNotNullOrEmpty(request.AssignedTo!.Id)
-                )
-                    ? await _userService.GetUserById(request.AssignedTo.Id)
-                    : null,
-                request.ExpiryDate,
-                request.Status,
-                fileAttachments
-            );
-            await _context.Tickets.AddAsync(ticket);
+            Ticket ticket;
+            bool isNew = !Utility.IsNotNullOrEmpty(request.Id);
+
+            if (!isNew)
+            {
+                ticket =
+                    await _context
+                        .Tickets.Include(t => t.IssuedByUser)
+                        .Include(t => t.AssignedToUser)
+                        .Include(t => t.Attachments)
+                        .FirstOrDefaultAsync(t => t.Id == request.Id.Value)
+                    ?? throw new NotFoundException("Ticket Not found");
+
+                ticket.Title = request.Title;
+                ticket.Expiry = request.ExpiryDate;
+                ticket.Status = request.Status;
+                ticket.Content = request.Content;
+
+                if (Utility.IsNotNullOrEmpty(request?.AssignedTo?.Id))
+                {
+                    ticket.AssignedToUser = await _userService.GetUserById(request.AssignedTo.Id);
+                }
+
+                if (request.Attachments != null && request.Attachments.Length > 0)
+                {
+                    FileAsset[] fileAttachments =
+                        await _fileAssetService.AddLocalDatabaseFileAssetsAsync(
+                            request.Attachments,
+                            FileAssetPurpose.TicketAttachment
+                        );
+
+                    foreach (var attachment in fileAttachments)
+                    {
+                        ticket.Attachments.Add(attachment);
+                    }
+                }
+            }
+            else
+            {
+                FileAsset[] fileAttachments =
+                    await _fileAssetService.AddLocalDatabaseFileAssetsAsync(
+                        request.Attachments ?? [],
+                        FileAssetPurpose.TicketAttachment
+                    );
+
+                var assignedUser =
+                    (
+                        Utility.IsNotNullOrEmpty(request.AssignedTo)
+                        && Utility.IsNotNullOrEmpty(request.AssignedTo!.Id)
+                    )
+                        ? await _userService.GetUserById(request.AssignedTo.Id)
+                        : null;
+
+                ticket = Ticket.CreateNew(
+                    request.Title,
+                    request.Content,
+                    await _userService.GetCurrentUser(),
+                    assignedUser,
+                    request.ExpiryDate,
+                    request.Status,
+                    fileAttachments
+                );
+
+                _context.Tickets.Add(ticket);
+            }
+
             await _context.SaveChangesAsync();
             return TicketMapper.toTicketResponse(ticket);
         }
+
+        public IQueryable<TicketResponse> GetTickets()
+        {
+            return _context
+                .Tickets.AsNoTracking()
+                .Select(t => new TicketResponse
+                {
+                    Id = t.Id,
+                    Status = t.Status,
+                    IssuedByUser = BasicUser.Create(t.IssuedByUser),
+                    ExpiryDate = t.Expiry,
+                    Content = t.Content,
+                    Title = t.Title,
+                    AssignedTo = Utility.IsNotNullOrEmpty(t.AssignedToUser)
+                        ? BasicUser.Create(t.AssignedToUser!)
+                        : null,
+                    Attachments = BasicFileAsset.ConvertToList(t.Attachments!.ToList()),
+                });
+        }
     }
-
-    //public async Task<Page<TicketResponse>> getTickets(TicketPageRequest ticketPageRequest)
-    //    {
-
-    //        return
-    //    }
 }

@@ -18,5 +18,9 @@
         public const int DEFAULT_PAGE_SIZE = 10;
         public const int DEFAULT_MAX_PAGE_SIZE = 50;
         public const int DEFAULT_START_PAGE_NUMBER = 0;
+
+        public const int INTERNAL_SERVER_ERROR_STATUS_CODE = 500;
+        public const string INTERNAL_SERVER_ERROR_MESSAGE = "An unexpected error occurred.";
+        public const string CONTENT_TYPE_JSON = "application/json";
     }
 }

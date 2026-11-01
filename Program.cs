@@ -2,10 +2,16 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OData.ModelBuilder;
 using MySqlConnector;
 using ticketManage.Data;
+using ticketManage.DTOs.FileAsset;
+using ticketManage.DTOs.Ticket;
+using ticketManage.DTOs.User;
+using ticketManage.Exceptions;
 using ticketManage.Models;
 using ticketManage.Services;
 using ticketManage.Utils;
@@ -158,10 +164,52 @@ builder.Services.AddCors(options =>
     );
 });
 
-builder.Services.AddControllers();
+var odataBuilder = new ODataConventionModelBuilder();
+odataBuilder.ComplexType<BasicUser>();
+odataBuilder.ComplexType<BasicFileAsset>();
+odataBuilder.EntitySet<TicketResponse>("Ticket");
+
+odataBuilder.EnableLowerCamelCase();
+builder
+    .Services.AddControllers()
+    .AddOData(options =>
+        options
+            .Select()
+            .Filter()
+            .OrderBy()
+            .Count()
+            .SetMaxTop(Constants.DEFAULT_MAX_PAGE_SIZE)
+            .AddRouteComponents("q/api", odataBuilder.GetEdmModel())
+    );
+;
 builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>();
 
 var app = builder.Build();
+
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        var exception = context
+            .Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>()
+            ?.Error;
+
+        context.Response.ContentType = Constants.CONTENT_TYPE_JSON;
+        context.Response.StatusCode = exception is AppException appException
+            ? appException.StatusCode
+            : Constants.INTERNAL_SERVER_ERROR_STATUS_CODE;
+
+        await context.Response.WriteAsJsonAsync(
+            new
+            {
+                success = false,
+                message = exception is AppException
+                    ? exception.Message
+                    : Constants.INTERNAL_SERVER_ERROR_MESSAGE,
+            }
+        );
+    });
+});
 
 var schemeProvider = app.Services.GetRequiredService<IAuthenticationSchemeProvider>();
 
