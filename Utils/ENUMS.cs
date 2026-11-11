@@ -58,4 +58,17 @@
         Csv,
         Zip,
     }
+
+    public enum CommentType
+    {
+        Comment,
+        Reply,
+    }
+
+    public enum ChangeOperation
+    {
+        Create,
+        Update,
+        Delete,
+    }
 }

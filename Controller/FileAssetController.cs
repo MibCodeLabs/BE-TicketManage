@@ -21,5 +21,11 @@ namespace ticketManage.Controller
 
             return File(fullFile.Data, fullFile.FileAsset.ContentType, fullFile.FileAsset.FileName);
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteFile([FromRoute] long id)
+        {
+            return Ok(await _fileAssetService.DeleteFile(id));
+        }
     }
 }

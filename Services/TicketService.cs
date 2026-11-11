@@ -27,11 +27,10 @@ namespace ticketManage.Services
             _fileAssetService = fileAssetService;
         }
 
-        public async Task<TicketResponse> GetTicket(long id)
+        public async Task<Ticket> GetTicket(long id)
         {
-            var ticket =
-                await _context.Tickets.FindAsync(id) ?? throw new InvalidDataException("Not found");
-            return TicketMapper.toTicketResponse(ticket);
+            return await _context.Tickets.FindAsync(id)
+                ?? throw new InvalidDataException("Not found");
         }
 
         public async Task<TicketResponse> UpsertTicket(UpsertTicketRequest request)

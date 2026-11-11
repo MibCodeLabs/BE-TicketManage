@@ -36,6 +36,7 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<FileAssetService>();
 builder.Services.AddScoped<StorageObjectService>();
 builder.Services.AddScoped<TicketService>();
+builder.Services.AddScoped<CommentService>();
 builder.Services.AddScoped<RefreshTokenService>();
 builder.Services.AddScoped<JwtService>();
 
@@ -159,6 +160,7 @@ builder.Services.AddCors(options =>
                 .WithOrigins("http://localhost:4200")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
+                .WithExposedHeaders("Content-Disposition")
                 .AllowCredentials();
         }
     );

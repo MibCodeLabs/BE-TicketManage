@@ -11,11 +11,17 @@ namespace ticketManage.Services
     {
         private readonly StorageObjectService _storageObjectService;
         private readonly AppDbContext _context;
+        private CurrentUserService _currentUserService;
 
-        public FileAssetService(AppDbContext context, StorageObjectService storageObjectService)
+        public FileAssetService(
+            AppDbContext context,
+            StorageObjectService storageObjectService,
+            CurrentUserService currentUserService
+        )
         {
             _context = context;
             _storageObjectService = storageObjectService;
+            _currentUserService = currentUserService;
         }
 
         public async Task<FileAsset[]> AddLocalDatabaseFileAssetsAsync(
@@ -53,13 +59,19 @@ namespace ticketManage.Services
             return fileAssets;
         }
 
+        internal async Task<int> DeleteFile(long id)
+        {
+            //ValidateFileDeletion(id);
+            return await _context.FileAssets.Where(f => f.Id == id).ExecuteDeleteAsync();
+        }
+
         internal async Task<(FileAsset FileAsset, byte[] Data)> GetFile(long id)
         {
             var file =
                 await _context
                     .FileAssets.Include(f => f.StorageObject)
                     .FirstOrDefaultAsync(f => f.Id == id)
-                ?? throw new NotFoundException("Ticket Not found");
+                ?? throw new NotFoundException("File Not found");
 
             var storageObject = file.StorageObject;
             if (Utility.IsNullOrEmpty(storageObject))
